@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="DualScope 复合学业路径评估网页，支持项目筛选、综合匹配评分、职业图谱、维度权重调整和对比清单。"
+    />
+    <title>DualScope 复合学业路径评估</title>
+    <link rel="preload" href="assets/degree-orbit.png" as="image" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="DualScope 首页">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>DualScope</span>
+      </a>
+      <nav class="nav-links" aria-label="主导航">
+        <a href="#programs">项目库</a>
+        <a href="#career-map">职业图谱</a>
+        <a href="#method">评估维度</a>
+        <a href="#compare">对比清单</a>
+        <button class="nav-button" type="button" data-open-advisor>AI顾问</button>
+      </nav>
+      <button class="save-button" type="button" id="saveSnapshot">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6.5 4.5h11v16l-5.5-3.2-5.5 3.2z" />
+        </svg>
+        保存清单
+      </button>
+    </header>
+
+    <main id="top">
+      <section class="hero-section" aria-labelledby="heroTitle">
+        <div class="hero-copy">
+          <h1 id="heroTitle">
+            <span>选双学位，</span>
+            <span>先看清路径</span>
+          </h1>
+          <p>
+            汇总官网项目、评估维度和跨学科就业方向，帮你比较不同双学位、联合学位与本硕衔接路径的真实取舍。
+          </p>
+          <div class="hero-actions" aria-label="主要操作">
+            <a class="button button-primary" href="#programs">开始评估</a>
+            <button class="button button-secondary" type="button" id="loadSample">
+              查看样例
+            </button>
+          </div>
+          <ul class="proof-row" aria-label="核心能力">
+            <li>
+              <strong>6</strong>
+              <span>评估维度</span>
+            </li>
+            <li>
+              <strong id="projectTotal">--</strong>
+              <span>官网项目索引</span>
+            </li>
+            <li>
+              <strong>实时</strong>
+              <span>权重排序</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="hero-visual" aria-label="综合匹配概览">
+          <img class="orbit-art" src="assets/degree-orbit.png" alt="" aria-hidden="true" />
+          <div class="score-panel">
+            <div class="panel-topline">
+              <span>综合匹配概览</span>
+              <button class="quiet-button" type="button" id="explainScore">如何计算?</button>
+            </div>
+            <div class="score-grid">
+              <div class="score-ring" aria-label="当前最高匹配分 86">
+                <span id="heroScore">86</span>
+                <small>最高匹配</small>
+              </div>
+              <div class="score-bars" id="heroBars"></div>
+            </div>
+          </div>
+
+          <div class="comparison-panel" id="compare" aria-labelledby="compareTitle">
+            <div class="panel-topline">
+              <h2 id="compareTitle">项目对比</h2>
+              <button class="quiet-button" type="button" id="clearCompare">清空</button>
+            </div>
+            <div class="comparison-table" id="compareTable"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="career-map-section" id="career-map" aria-labelledby="careerMapTitle">
+        <div class="career-map-head">
+          <div>
+            <h2 id="careerMapTitle">主修 + 双学位复合就业图谱</h2>
+            <p>
+              先选主修，再点一个跨学科方向，图谱会连出对应岗位路径、能力组合和典型项目关键词。
+            </p>
+          </div>
+          <div class="major-switcher" id="majorSwitcher" aria-label="选择主修"></div>
+        </div>
+
+        <div class="career-map-layout">
+          <div class="graph-panel">
+            <svg id="careerGraph" viewBox="0 0 920 560" role="img" aria-label="主修与双学位职业关系图"></svg>
+          </div>
+          <aside class="career-insight" aria-live="polite">
+            <span class="small-label">交叉方向</span>
+            <h3 id="pathTitle">计算机科学 × 医学/生物</h3>
+            <p id="pathSummary">
+              多模态医疗影像融合、AI 辅助诊断、医学知识图谱和临床数据平台，是计算机主修叠加医学/生物方向后的高频路径。
+            </p>
+            <div class="direction-list" id="directionList"></div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="workspace" id="programs" aria-labelledby="workspaceTitle">
+        <div class="workspace-head">
+          <div>
+            <h2 id="workspaceTitle">评估与对比</h2>
+            <p>选择条件，发现并对比更适合你的双学位项目。</p>
+          </div>
+          <div class="result-count" id="resultCount" aria-live="polite"></div>
+        </div>
+
+        <form class="filter-board" id="filters">
+          <label>
+            <span>学科领域</span>
+            <select name="discipline">
+              <option value="all">全部领域</option>
+              <option value="philosophy">哲学</option>
+              <option value="economics">经济学</option>
+              <option value="law">法学</option>
+              <option value="education">教育学</option>
+              <option value="literature">文学</option>
+              <option value="history">历史学</option>
+              <option value="science">理学</option>
+              <option value="engineering">工学</option>
+              <option value="agriculture">农学</option>
+              <option value="medicine">医学</option>
+              <option value="management">管理学</option>
+              <option value="arts">艺术学</option>
+              <option value="interdisciplinary">交叉学科</option>
+            </select>
+          </label>
+          <label>
+            <span>课程负荷</span>
+            <select name="workload">
+              <option value="all">不限</option>
+              <option value="low">轻量</option>
+              <option value="medium">中等</option>
+              <option value="high">高强度</option>
+            </select>
+          </label>
+          <label>
+            <span>学费范围</span>
+            <select name="budget">
+              <option value="all">不限</option>
+              <option value="low">15 万以内</option>
+              <option value="medium">15-25 万</option>
+              <option value="high">25 万以上</option>
+            </select>
+          </label>
+          <label>
+            <span>申请难度</span>
+            <select name="difficulty">
+              <option value="all">不限</option>
+              <option value="low">友好</option>
+              <option value="medium">中等</option>
+              <option value="high">竞争强</option>
+            </select>
+          </label>
+          <button class="button button-primary apply-button" type="submit">应用筛选</button>
+        </form>
+
+        <div class="tool-layout">
+          <aside class="weights-panel" id="method" aria-labelledby="methodTitle">
+            <h2 id="methodTitle">权重</h2>
+            <p>拖动权重，匹配分会即时重排。</p>
+            <div class="weights-list" id="weights"></div>
+          </aside>
+
+          <section class="program-panel" aria-label="项目结果">
+            <div class="panel-toolbar">
+              <div class="segmented" role="tablist" aria-label="排序模式">
+                <button type="button" class="active" data-sort="match">综合匹配</button>
+                <button type="button" data-sort="career">职业相关</button>
+                <button type="button" data-sort="cost">成本友好</button>
+              </div>
+              <button class="button button-secondary compact" type="button" data-open-advisor>
+                询问AI顾问
+              </button>
+            </div>
+            <div class="program-list" id="programList"></div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <aside class="advisor" id="advisor" aria-hidden="true" aria-labelledby="advisorTitle">
+      <div class="advisor-shell">
+        <div class="advisor-head">
+          <div>
+            <h2 id="advisorTitle">AI顾问</h2>
+            <p>当前为本地模拟，接入 Vercel Serverless 后可替换为真实模型响应。</p>
+          </div>
+          <button class="icon-button" type="button" data-close-advisor aria-label="关闭AI顾问">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M7 7l10 10M17 7L7 17" />
+            </svg>
+          </button>
+        </div>
+        <div class="messages" id="messages" aria-live="polite"></div>
+        <form class="advisor-form" id="advisorForm">
+          <label class="sr-only" for="advisorInput">输入问题</label>
+          <input
+            id="advisorInput"
+            name="message"
+            type="text"
+            placeholder="例如：我想走数据产品方向，应该优先看什么？"
+            autocomplete="off"
+          />
+          <button class="icon-button send" type="submit" aria-label="发送">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 12l15-7-4 14-3.5-5.5z" />
+            </svg>
+          </button>
+        </form>
+      </div>
+    </aside>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="script.js"></script>
+  </body>
+</html>
